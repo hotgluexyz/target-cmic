@@ -1,29 +1,18 @@
 """CMiC target class."""
 
-from target_hotglue.target import TargetHotglue
-from typing import List, Optional, Union, Type
-from pathlib import PurePath
-from singer_sdk import typing as th
-from singer_sdk.sinks import Sink
+from typing import Type
+from hotglue_singer_sdk import typing as th
+from hotglue_singer_sdk.sinks import Sink
+from hotglue_singer_sdk.target_sdk.target import TargetHotglue
 
-from target_cmic.sinks import FallbackSync
+from target_cmic.sinks import InsuranceSink
 
 
 class TargetCmic(TargetHotglue):
     """Singer target for CMiC."""
 
-    def __init__(
-        self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
-        parse_env_config: bool = False,
-        validate_config: bool = True,
-        state: str = None,
-    ) -> None:
-        self.config_file = config[0] if isinstance(config, list) else config
-        super().__init__(config, parse_env_config, validate_config)
-
     name = "target-cmic"
-    SINK_TYPES = [FallbackSync]
+    SINK_TYPES = [InsuranceSink]
 
     config_jsonschema = th.PropertiesList(
         th.Property(
@@ -44,8 +33,9 @@ class TargetCmic(TargetHotglue):
     ).to_dict()
 
     def get_sink_class(self, stream_name: str) -> Type[Sink]:
-        return FallbackSync
-
+        for sink_type in self.SINK_TYPES:
+            if sink_type.name == stream_name:
+                return sink_type
 
 if __name__ == "__main__":
     TargetCmic.cli()

@@ -1,9 +1,7 @@
-from target_hotglue.client import HotglueSink
-from singer_sdk.plugin_base import PluginBase
-from typing import Dict, List, Optional
-from base64 import b64encode
 import backoff
 import requests
+from hotglue_singer_sdk.target_sdk.client import HotglueSink
+from target_cmic.auth import CmicBasicAuthenticator
 
 
 def giveup(exc):
@@ -28,29 +26,7 @@ def on_giveup(details):
     )
 
 
-class CmicBasicAuthenticator:
-    """Basic Auth authenticator for CMiC API."""
-
-    def __init__(self, username: str, password: str) -> None:
-        token = b64encode(f"{username}:{password}".encode()).decode()
-        self._auth_headers = {"Authorization": f"Basic {token}"}
-
-    @property
-    def auth_headers(self) -> dict:
-        return self._auth_headers
-
-
 class CmicSink(HotglueSink):
-
-    def __init__(
-        self,
-        target: PluginBase,
-        stream_name: str,
-        schema: Dict,
-        key_properties: Optional[List[str]],
-    ) -> None:
-        self._target = target
-        super().__init__(target, stream_name, schema, key_properties)
 
     @property
     def base_url(self):
@@ -80,3 +56,23 @@ class CmicSink(HotglueSink):
     )
     def request_api(self, method, endpoint, request_data=None):
         return super().request_api(method, endpoint=endpoint, request_data=request_data)
+
+    def preprocess_record(self, record: dict, context: dict) -> dict:
+        return record
+
+    def upsert_record(self, record: dict, context: dict):
+        state_updates = dict()
+        method = "POST"
+        endpoint = self.endpoint
+        pk = self.key_properties[0] if self.key_properties else "id"
+
+        if record is not None:
+            id = record.pop(pk, None)
+
+            if id:
+                method = "PATCH"
+                endpoint = f"{endpoint}/{id}"
+
+            self.request_api(method, endpoint=endpoint, request_data=record)
+
+            return id, True, state_updates
