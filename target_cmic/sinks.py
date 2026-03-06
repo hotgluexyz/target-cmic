@@ -8,3 +8,10 @@ class InsuranceSink(CmicSink):
 
     name = "insurance"
     endpoint = f"/ap-rest-api/rest/1/apinsurance"
+    pk = "InsVUuid"
+
+    def preprocess_record(self, record: dict, context: dict) -> dict:
+        if not record.get("id", record.get(self.pk)):
+            # add empty pk field, or response of creation will not have the uuid
+            record[self.pk] = ""
+        return record

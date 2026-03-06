@@ -73,6 +73,8 @@ class CmicSink(HotglueSink):
                 method = "PATCH"
                 endpoint = f"{endpoint}/{id}"
 
-            self.request_api(method, endpoint=endpoint, request_data=record)
+            response = self.request_api(method, endpoint=endpoint, request_data=record)
+            if not id:
+                id = response.json().get(self.pk)     
 
             return id, True, state_updates
