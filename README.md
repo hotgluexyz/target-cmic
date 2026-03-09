@@ -28,21 +28,28 @@ Example `config.json`:
 }
 ```
 
-### FallbackSync
+### Sinks
 
-The target uses a single `FallbackSync` sink that accepts **any** stream name and maps it directly to a CMiC REST API endpoint. The stream name becomes the URL path appended to `base_url`.
+The target uses named sinks; each stream must match a registered sink. Records are sent to the CMiC REST API with Basic Auth.
 
-For example, a Singer input like:
+| Stream     | Sink           | Endpoint                      | Key property |
+|------------|----------------|-------------------------------|--------------|
+| `insurance`| `InsuranceSink`| `/ap-rest-api/rest/1/apinsurance` | `InsVUuid`   |
+
+**Behavior**
+
+- **New records:** POST to `{base_url}{endpoint}`. If the record has no key (`InsVUuid` for insurance), the sink sets it to an empty string so the API returns the created UUID.
+- **Existing records:** If the record contains the key property, the target PATCHes `{base_url}{endpoint}/{id}` instead of POSTing.
+
+Example Singer input for the insurance stream:
 
 ```json
-{"type": "SCHEMA", "stream": "ap-rest-api/rest/1/apinsurance", "schema": {"type": "object", "properties": {}}, "key_properties": []}
-{"type": "RECORD", "stream": "ap-rest-api/rest/1/apinsurance", "record": {"InsComplType": "VEN", "InsCompCode": "001", "InsCertNum": "123"}}
+{"type": "SCHEMA", "stream": "insurance", "schema": {"type": "object", "properties": {}}, "key_properties": ["InsVUuid"]}
+{"type": "RECORD", "stream": "insurance", "record": {"InsComplType": "VEN", "InsCompCode": "001", "InsCertNum": "123"}}
 {"type": "STATE", "value": {}}
 ```
 
-will POST the record to `{base_url}/ap-rest-api/rest/1/apinsurance` with Basic Auth headers.
-
-If the record contains an `id` field (or whatever is set as the key property), the target will PATCH `{endpoint}/{id}` instead of POST.
+This POSTs the record to `{base_url}/ap-rest-api/rest/1/apinsurance`. A record that includes `InsVUuid` is PATCHed to `{base_url}/ap-rest-api/rest/1/apinsurance/{InsVUuid}`.
 
 ## Usage
 
