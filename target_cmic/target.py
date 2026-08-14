@@ -21,7 +21,12 @@ class TargetCmic(TargetHotglue):
             required=True,
         ),
         th.Property(
-            "username",
+            "client_id",
+            th.StringType,
+            required=True,
+        ),
+        th.Property(
+            "user_id",
             th.StringType,
             required=True,
         ),
