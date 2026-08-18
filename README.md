@@ -15,7 +15,8 @@ pipx install target-cmic
 | Setting    | Required | Description                          |
 |------------|----------|--------------------------------------|
 | `base_url` | Yes      | CMiC API base URL                    |
-| `username` | Yes      | Basic auth username                  |
+| `client_id`| Yes      | CMiC Client ID                       |
+| `user_id`  | Yes      | CMiC User ID                         |
 | `password` | Yes      | Basic auth password                  |
 
 Example `config.json`:
@@ -23,7 +24,8 @@ Example `config.json`:
 ```json
 {
   "base_url": "https://partner-sandbox-api-basic.cmiccloud.com/cmicprtn",
-  "username": "COMPANY||USER",
+  "client_id": "COMPANY",
+  "user_id": "USER",
   "password": "secret"
 }
 ```
