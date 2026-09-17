@@ -1,7 +1,7 @@
 import backoff
 import requests
 from hotglue_singer_sdk.target_sdk.client import HotglueSink
-from target_cmic.auth import CmicBasicAuthenticator
+from target_cmic.auth import CmicBasicAuthenticator, CmicOAuthAuthenticator
 
 
 def giveup(exc):
@@ -34,8 +34,10 @@ class CmicSink(HotglueSink):
 
     @property
     def authenticator(self):
+        if self.config.get("client_secret"):
+            return CmicOAuthAuthenticator(self._target)
         return CmicBasicAuthenticator(
-            f"{self.config.get("client_id")}||{self.config.get("user_id")}",
+            f"{self.config.get('client_id')}||{self.config.get('user_id')}",
             self.config.get("password"),
         )
 
