@@ -35,7 +35,7 @@ class CmicSink(HotglueSink):
     @property
     def authenticator(self):
         return CmicBasicAuthenticator(
-            f"{self.config.get("client_id")}||{self.config.get("user_id")}",
+            f"{self.config.get('client_id')}||{self.config.get('user_id')}",
             self.config.get("password"),
         )
 
