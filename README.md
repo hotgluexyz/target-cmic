@@ -1,6 +1,6 @@
 # target-cmic
 
-`target-cmic` is a Singer target for writing data to the [CMiC](https://www.cmicglobal.com/) REST API, built with the Meltano SDK for Singer Targets.
+`target-cmic` is a Singer target for writing data to the [CMiC](https://www.cmicglobal.com/) REST API, built with [hotglue-singer-sdk](https://github.com/hotgluexyz/HotglueSingerSDK).
 
 ## Installation
 
@@ -10,29 +10,48 @@ pipx install target-cmic
 
 ## Configuration
 
-### Accepted Config Options
+Auth mode is selected from config: if `client_secret` is set, the target uses OAuth client credentials; otherwise Basic Auth.
 
-| Setting    | Required | Description                          |
-|------------|----------|--------------------------------------|
-| `base_url` | Yes      | CMiC API base URL                    |
-| `client_id`| Yes      | CMiC Client ID                       |
-| `user_id`  | Yes      | CMiC User ID                         |
-| `password` | Yes      | Basic auth password                  |
+CMiC Cloud uses separate API hosts for Basic vs OAuth. Use the host that matches your auth mode. See CMiC's [Cloud Web APP and API URLs](https://developers.cmicglobal.com/v1/docs/cloud-api-server-urls).
 
-Example `config.json`:
+| Setting | Required | Default | Description |
+| ------- | -------- | ------- | ----------- |
+| `base_url` | yes | — | CMiC API base URL, without a trailing slash (Basic or OAuth host). |
+| `client_id` | yes | — | CMiC Client ID (Basic) or Entra application (client) ID (OAuth). |
+| `user_id` | Basic | — | CMiC User ID (Basic Auth). |
+| `password` | Basic | — | Account password (Basic Auth). |
+| `client_secret` | OAuth | — | Entra client secret. |
+| `tenant_id` | OAuth* | — | Entra directory (tenant) ID. |
+| `token_url` | OAuth* | `https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token` | Entra token endpoint. Built from `tenant_id` when omitted. |
+| `scope` | no | `api://{client_id}/.default` | OAuth scope for client credentials. |
+
+\* OAuth requires `client_secret` plus either `tenant_id` or `token_url`.
+
+### Example Basic Auth `config.json`
 
 ```json
 {
-  "base_url": "https://partner-sandbox-api-basic.cmiccloud.com/cmicprtn",
-  "client_id": "COMPANY",
-  "user_id": "USER",
-  "password": "secret"
+  "base_url": "https://atlas-api.cmiccloud.com/cmicprod",
+  "client_id": "Client_ID",
+  "user_id": "User_ID",
+  "password": "YOUR_PASSWORD"
+}
+```
+
+### Example OAuth `config.json`
+
+```json
+{
+  "base_url": "https://atlas-api-oauth.cmiccloud.com/cmicprod",
+  "client_id": "ENTRA_APPLICATION_CLIENT_ID",
+  "client_secret": "ENTRA_CLIENT_SECRET",
+  "tenant_id": "ENTRA_TENANT_ID"
 }
 ```
 
 ### Sinks
 
-The target uses named sinks; each stream must match a registered sink. Records are sent to the CMiC REST API with Basic Auth.
+The target uses named sinks; each stream must match a registered sink. Records are sent to the CMiC REST API with Basic or OAuth auth.
 
 | Stream     | Sink           | Endpoint                      | Key property |
 |------------|----------------|-------------------------------|--------------|
