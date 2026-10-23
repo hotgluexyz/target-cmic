@@ -15,3 +15,11 @@ class InsuranceSink(CmicSink):
             # add empty pk field, or response of creation will not have the uuid
             record[self.pk] = ""
         return record
+
+
+class ContractsSink(CmicSink):
+    """Sink for subcontract (scmast) records."""
+
+    name = "contracts"
+    endpoint = "/pm-rest-api/rest/1/scmast"
+    pk = "ScmstVUuid"

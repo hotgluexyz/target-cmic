@@ -6,14 +6,14 @@ from hotglue_singer_sdk import typing as th
 from hotglue_singer_sdk.sinks import Sink
 from hotglue_singer_sdk.target_sdk.target import TargetHotglue
 
-from target_cmic.sinks import InsuranceSink
+from target_cmic.sinks import ContractsSink, InsuranceSink
 
 
 class TargetCmic(TargetHotglue):
     """Singer target for CMiC."""
 
     name = "target-cmic"
-    SINK_TYPES = [InsuranceSink]
+    SINK_TYPES = [InsuranceSink, ContractsSink]
 
     config_jsonschema = th.PropertiesList(
         th.Property(
