@@ -53,14 +53,15 @@ CMiC Cloud uses separate API hosts for Basic vs OAuth. Use the host that matches
 
 The target uses named sinks; each stream must match a registered sink. Records are sent to the CMiC REST API with Basic or OAuth auth.
 
-| Stream     | Sink           | Endpoint                      | Key property |
-|------------|----------------|-------------------------------|--------------|
-| `insurance`| `InsuranceSink`| `/ap-rest-api/rest/1/apinsurance` | `InsVUuid`   |
+| Stream      | Sink            | Endpoint                         | Key property   |
+|-------------|-----------------|----------------------------------|----------------|
+| `insurance` | `InsuranceSink` | `/ap-rest-api/rest/1/apinsurance` | `InsVUuid`     |
+| `contracts` | `ContractsSink` | `/pm-rest-api/rest/1/scmast`      | `ScmstVUuid`   |
 
 **Behavior**
 
 - **New records:** POST to `{base_url}{endpoint}`. If the record has no key (`InsVUuid` for insurance), the sink sets it to an empty string so the API returns the created UUID.
-- **Existing records:** If the record contains the key property, the target PATCHes `{base_url}{endpoint}/{id}` instead of POSTing.
+- **Existing records:** If the record contains the key property, the target PATCHes `{base_url}{endpoint}/{id}` instead of POSTing. Current `contracts` usage is update-only (`ScmstVUuid` + fields such as `ScmstStatusCode`).
 
 Example Singer input for the insurance stream:
 
